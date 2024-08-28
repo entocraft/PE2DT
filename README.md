@@ -1,5 +1,5 @@
 # PE2DT
-Pyrenne Endurance Driver &amp; Data Tracker
+Pyrene Endurance Driver &amp; Data Tracker
 
 objectif ⛳️
 - pouvoir parametrer, suivre et conserver les courses
