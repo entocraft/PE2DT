@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion d'Équipe Karting</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <style>
+        .section-content {
+            display: none; /* Cacher toutes les sections par défaut */
+        }
+        .active-section {
+            display: block; /* Afficher la section active */
+        }
+        .alarm {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <h1>Gestion de l'Équipe de Karting</h1>
+
+    <!-- Menu de Navigation -->
+    <nav class="nav nav-pills mb-4">
+        <a class="nav-link active" href="#" onclick="showSection('pilots-section')">Pilotes</a>
+        <a class="nav-link" href="#" onclick="showSection('race-info-section')">Informations sur la Course</a>
+        <a class="nav-link" href="#" onclick="showSection('relays-section')">Planification des Relais</a>
+        <a class="nav-link" href="#" onclick="showSection('race-management-section')">Gestion des Relais</a>
+    </nav>
+
+    <!-- Sections de la Page -->
+    <section id="pilots-section" class="section-content active-section">
+        <h2>Pilotes</h2>
+        <form id="pilot-form">
+            <div class="mb-3">
+                <label for="pilotName" class="form-label">Nom du Pilote</label>
+                <input type="text" id="pilotName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="pilotAge" class="form-label">Âge</label>
+                <input type="number" id="pilotAge" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="pilotWeight" class="form-label">Poids (kg)</label>
+                <input type="number" id="pilotWeight" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="pilotLest" class="form-label">Lest (kg)</label>
+                <input type="number" id="pilotLest" class="form-control" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addPilot()">Ajouter Pilote</button>
+        </form>
+
+        <h3 class="mt-4">Liste des Pilotes</h3>
+        <ul id="pilotList" class="list-group">
+            <!-- Liste des pilotes -->
+        </ul>
+    </section>
+
+    <section id="race-info-section" class="section-content">
+        <h2>Informations sur la Course</h2>
+        <form id="race-form">
+            <div class="mb-3">
+                <label for="raceDuration" class="form-label">Durée de la Course (minutes)</label>
+                <input type="number" id="raceDuration" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="minStops" class="form-label">Nombre d'Arrêts Minimum</label>
+                <input type="number" id="minStops" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="minStopTime" class="form-label">Temps Minimum pour chaque Arrêt (minutes)</label>
+                <input type="number" id="minStopTime" class="form-control" required>
+            </div>
+            <button type="button" class="btn btn-success" onclick="generateRelays()">Générer les Relais</button>
+        </form>
+    </section>
+
+    <section id="relays-section" class="section-content">
+        <h2>Planification des Relais</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Relais</th>
+                    <th>Pilote</th>
+                    <th>Durée</th>
+                    <th>Lest</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="relaysTableBody">
+                <!-- Relais générés -->
+            </tbody>
+        </table>
+    </section>
+
+    <section id="race-management-section" class="section-content">
+        <h2>Gestion des Relais en Direct</h2>
+        <div id="race-timer">
+            <h3>Temps Restant : <span id="time-remaining">--:--:--</span></h3>
+            <h4>Relais en Cours : <span id="current-relay">N/A</span></h4>
+            <h4>Pilote en Cours : <span id="current-pilot">N/A</span></h4>
+            <h4>Lest en Cours : <span id="current-lest">N/A</span></h4>
+            <h4>Pilote Suivant : <span id="next-pilot">N/A</span></h4>
+            <h4>Lest Suivant : <span id="next-lest">N/A</span></h4>
+            <h4>Temps Écoulé du Relais : <span id="relay-timer">--:--</span></h4>
+            <h4 class="alarm" id="alarm-message"></h4>
+        </div>
+        <button class="btn btn-danger mt-3" id="start-race-btn" onclick="startRace()">Lancer la Course</button>
+        <button class="btn btn-secondary mt-3" id="stop-race-btn" onclick="stopRace()" disabled>Arrêter la Course</button>
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Relais</th>
+                    <th>Pilote</th>
+                    <th>Durée Prévue</th>
+                    <th>Lest</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="raceManagementTableBody">
+                <!-- Gestion des relais -->
+            </tbody>
+        </table>
+    </section>
+
+    <script>
+        const pilots = [];
+        let relays = [];
+        let raceDuration, minStops, minStopTime;
+        let totalTimeRemaining, currentRelayIndex = 0, relayTimeRemaining;
+        let raceInterval, relayInterval;
+        let alarmIntervals = [120, 60, 30, 10, 5, 3, 2, 1]; // Alarmes à 2 min, 1 min, etc.
+        let alarmTimeouts = [];
+
+        function addPilot() {
+            const name = document.getElementById('pilotName').value;
+            const age = document.getElementById('pilotAge').value;
+            const weight = document.getElementById('pilotWeight').value;
+            const lest = document.getElementById('pilotLest').value;
+
+            const pilot = { name, age, weight, lest };
+            pilots.push(pilot);
+
+            updatePilotList();
+        }
+
+        function updatePilotList() {
+            const pilotList = document.getElementById('pilotList');
+            pilotList.innerHTML = '';
+            pilots.forEach((pilot, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.textContent = `${pilot.name} (Âge: ${pilot.age}, Poids: ${pilot.weight} kg, Lest: ${pilot.lest} kg)`;
+                pilotList.appendChild(listItem);
+            });
+        }
+
+        function generateRelays() {
+            raceDuration = parseInt(document.getElementById('raceDuration').value);
+            minStops = parseInt(document.getElementById('minStops').value);
+            minStopTime = parseInt(document.getElementById('minStopTime').value);
+
+            relays = []; // Réinitialiser les relais
+            const totalRelays = minStops + 1;
+            const relayDuration = Math.floor(raceDuration / totalRelays);
+            const extraTime = raceDuration - relayDuration * totalRelays;
+
+            const relaysTableBody = document.getElementById('relaysTableBody');
+            const raceManagementTableBody = document.getElementById('raceManagementTableBody');
+            relaysTableBody.innerHTML = '';
+            raceManagementTableBody.innerHTML = '';
+
+            for (let i = 0; i < totalRelays; i++) {
+                const pilotIndex = i % pilots.length;
+                const pilot = pilots[pilotIndex];
+                const duration = (i === totalRelays - 1) ? relayDuration + extraTime : relayDuration;
+
+                const relay = { number: i + 1, pilot: pilot.name, duration, lest: pilot.lest };
+                relays.push(relay);
+
+                // Ajouter à la table de planification
+                const row = relaysTableBody.insertRow();
+                row.insertCell(0).textContent = relay.number;
+                row.insertCell(1).textContent = relay.pilot;
+                row.insertCell(2).textContent = `${relay.duration} min`;
+                row.insertCell(3).textContent = `${relay.lest} kg`;
+                const actionsCell = row.insertCell(4);
+                actionsCell.appendChild(createRelayActionButtons(relay.number - 1));
+
+                // Ajouter à la table de gestion
+                const raceRow = raceManagementTableBody.insertRow();
+                raceRow.insertCell(0).textContent = relay.number;
+                raceRow.insertCell(1).textContent = relay.pilot;
+                raceRow.insertCell(2).textContent = `${relay.duration} min`;
+                raceRow.insertCell(3).textContent = `${relay.lest} kg`;
+                raceRow.insertCell(4).textContent = "À venir";
+                raceRow.insertCell(5).appendChild(createRelayActionButtons(relay.number - 1));
+                raceRow.setAttribute('id', `race-row-${relay.number}`);
+            }
+        }
+
+        function createRelayActionButtons(index) {
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-warning btn-sm me-1';
+            editBtn.textContent = 'Modifier';
+            editBtn.onclick = () => editRelay(index);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-danger btn-sm';
+            deleteBtn.textContent = 'Supprimer';
+            deleteBtn.onclick = () => deleteRelay(index);
+
+            const moveUpBtn = document.createElement('button');
+            moveUpBtn.className = 'btn btn-secondary btn-sm me-1';
+            moveUpBtn.textContent = '↑';
+            moveUpBtn.onclick = () => moveRelay(index, -1);
+
+            const moveDownBtn = document.createElement('button');
+            moveDownBtn.className = 'btn btn-secondary btn-sm me-1';
+            moveDownBtn.textContent = '↓';
+            moveDownBtn.onclick = () => moveRelay(index, 1);
+
+            const container = document.createElement('div');
+            container.appendChild(moveUpBtn);
+            container.appendChild(moveDownBtn);
+            container.appendChild(editBtn);
+            container.appendChild(deleteBtn);
+
+            return container;
+        }
+
+        function moveRelay(index, direction) {
+            if ((index + direction >= 0) && (index + direction < relays.length)) {
+                [relays[index], relays[index + direction]] = [relays[index + direction], relays[index]];
+                generateRelays(); // Recréer la liste
+            }
+        }
+
+        function editRelay(index) {
+            const relay = relays[index];
+            const newDuration = prompt("Durée du relais (minutes):", relay.duration);
+            const newPilotIndex = prompt("Numéro du pilote (1, 2, ...):", pilots.findIndex(p => p.name === relay.pilot) + 1);
+            const newPilot = pilots[newPilotIndex - 1];
+
+            if (newDuration !== null && newPilot !== undefined) {
+                relay.duration = parseInt(newDuration);
+                relay.pilot = newPilot.name;
+                relay.lest = newPilot.lest;
+                generateRelays(); // Recréer la liste
+            }
+        }
+
+        function deleteRelay(index) {
+            relays.splice(index, 1);
+            generateRelays(); // Recréer la liste
+        }
+
+        function startRace() {
+            totalTimeRemaining = raceDuration * 60;
+            document.getElementById('start-race-btn').disabled = true;
+            document.getElementById('stop-race-btn').disabled = false;
+            raceInterval = setInterval(updateRaceTimer, 1000);
+            startNextRelay();
+        }
+
+        function stopRace() {
+            clearInterval(raceInterval);
+            clearInterval(relayInterval);
+            alarmTimeouts.forEach(timeout => clearTimeout(timeout));
+            document.getElementById('start-race-btn').disabled = false;
+            document.getElementById('stop-race-btn').disabled = true;
+            alert("Course arrêtée !");
+        }
+
+        function startNextRelay() {
+            if (currentRelayIndex >= relays.length) {
+                clearInterval(raceInterval);
+                clearInterval(relayInterval);
+                alert("Course terminée !");
+                return;
+            }
+
+            const currentRelay = relays[currentRelayIndex];
+            const nextRelay = relays[currentRelayIndex + 1] || {};
+            document.getElementById('current-relay').textContent = currentRelay.number;
+            document.getElementById('current-pilot').textContent = currentRelay.pilot;
+            document.getElementById('current-lest').textContent = `${currentRelay.lest} kg`;
+            document.getElementById('next-pilot').textContent = nextRelay.pilot || 'N/A';
+            document.getElementById('next-lest').textContent = `${nextRelay.lest || 'N/A'} kg`;
+
+            relayTimeRemaining = currentRelay.duration * 60;
+            updateRelayTimer();
+            relayInterval = setInterval(updateRelayTimer, 1000);
+
+            document.getElementById(`race-row-${currentRelay.number}`).cells[4].textContent = "En cours";
+
+            alarmTimeouts = [];
+            alarmIntervals.forEach(interval => {
+                if (relayTimeRemaining > interval) {
+                    alarmTimeouts.push(setTimeout(() => showAlarmMessage(interval), (relayTimeRemaining - interval) * 1000));
+                }
+            });
+        }
+
+        function updateRaceTimer() {
+            totalTimeRemaining--;
+            const hours = Math.floor(totalTimeRemaining / 3600);
+            const minutes = Math.floor((totalTimeRemaining % 3600) / 60);
+            const seconds = totalTimeRemaining % 60;
+            document.getElementById('time-remaining').textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (totalTimeRemaining <= 0) {
+                clearInterval(raceInterval);
+                alert("Course terminée !");
+            }
+        }
+
+        function updateRelayTimer() {
+            relayTimeRemaining--;
+            const minutes = Math.floor(relayTimeRemaining / 60);
+            const seconds = relayTimeRemaining % 60;
+            document.getElementById('relay-timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (relayTimeRemaining <= 0) {
+                clearInterval(relayInterval);
+                alarmTimeouts.forEach(timeout => clearTimeout(timeout));
+                document.getElementById(`race-row-${relays[currentRelayIndex].number}`).cells[4].textContent = "Terminé";
+                currentRelayIndex++;
+                startNextRelay();
+            }
+        }
+
+        function showAlarmMessage(secondsLeft) {
+            const message = `Attention : ${secondsLeft} secondes restantes pour le relais !`;
+            document.getElementById('alarm-message').textContent = message;
+            setTimeout(() => {
+                document.getElementById('alarm-message').textContent = '';
+            }, 2000);
+        }
+
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById(sectionId).classList.add('active-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
