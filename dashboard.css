@@ -3,6 +3,29 @@
     height: calc(100% - 50px); /* Subtract the height of the navbar */
 }
 
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+.driver_card{
+    width: 12vw;
+    padding: 10px;
+    background-color: rgb(255, 255, 255);
+    margin-left: 1.5vw;
+    margin-right: 1.5vw;
+    margin-top: 2vw;
+    border-radius: 15px;
+}
+
+.pp{
+    width: 50px;
+    height: 50px;
+    margin: 0px 10px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .bento {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
