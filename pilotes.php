@@ -9,12 +9,18 @@
 </head>
 
 <body>
+    <?php
+        $race_id = $_GET['id'];
+    ?>
+    
     <div class="nav">
-        <a href="index.php">Accueil</a>
-        <a href="course.php">Course</a>
-        <a href="pilotes.php">Pilotes</a>
-        <a href="resultats.php">Résultats</a>
-        <a href="parametres.php">Paramètres</a>
+        <?php
+            echo "<a href='dashboard.php?id=" . $race_id . "'>Accueil</a>";
+            echo "<a href='course.php?id=" . $race_id . "'>Course</a>";
+            echo "<a href='pilotes.php?id=" . $race_id . "'>Pilotes</a>";
+            echo "<a href='resultats.php?id=" . $race_id . "'>Résultats</a>";
+            echo "<a href='parametres.php?id=" . $race_id . "'>Paramètres</a>";
+        ?>
     </div>
 
     <div class="dashboard">
@@ -24,7 +30,7 @@
 
                 $sql = "SELECT * FROM drivers";
                 $result = mysqli_query($conn, $sql);
-                        
+
                 while ($driver = mysqli_fetch_assoc($result)) {
                     echo "<div class='driver_card'>" ;
                     echo "<img class='pp' src='" . $driver['pic'] . "'>";

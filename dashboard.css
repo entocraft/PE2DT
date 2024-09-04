@@ -6,16 +6,17 @@
 .container {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
 }
 
 .driver_card{
-    width: 12vw;
     padding: 10px;
     background-color: rgb(255, 255, 255);
-    margin-left: 1.5vw;
-    margin-right: 1.5vw;
-    margin-top: 2vw;
     border-radius: 15px;
+    width: calc(20vw - 20px); /* 20% pour 5 cartes par ligne, ajustez les marges si nécessaire */
+    margin: 10px;
+    box-sizing: border-box;
 }
 
 .pp{
@@ -27,25 +28,23 @@
 }
 
 .bento {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    grid-template-rows: auto;
-    width: 100%;
-    height: 100%;
-    gap: 20px;
-    padding: 20px;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
 }
 
 .bento-item {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 10px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 15px;
+    width: calc(20vw - 20px); /* 20% pour 5 cartes par ligne, ajustez les marges si nécessaire */
+    margin: 10px;
+    box-sizing: border-box;
 }
 
 .bento-item h3 {
@@ -53,9 +52,17 @@
     font-size: 1.2em;
 }
 
-.bento-item.large {
-    grid-column: span 2; /* This makes the item span across 2 columns */
-    grid-row: span 2;    /* This makes the item span across 2 rows */
+.bento-item-large {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 15px;
+    width: calc(50vw - 20px); /* 20% pour 5 cartes par ligne, ajustez les marges si nécessaire */
+    margin: 10px;
+    box-sizing: border-box;
 }
 
 form label, form input, form select {
@@ -89,4 +96,20 @@ form input[type="submit"]:hover {
     padding: 10px;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.button {
+    background-color: #1b1464;
+    border: 0px;
+    border-radius: 10px;
+    color: rgb(255, 255, 255);
+    padding: 4px 4px;
+}
+
+.button:disabled {
+    background-color: #cacaca;
+    border: 0px;
+    border-radius: 10px;
+    color: rgb(85, 85, 85);
+    padding: 4px 4px;
 }

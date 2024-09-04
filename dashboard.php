@@ -40,7 +40,7 @@
             <div class="bento-item">
                 <h3>Temps de course restant</h3>
                 <p id="timeRemaining">--:--:--</p>
-                <button id="startButton">Démarrer le compte à rebours</button>
+                <button class="button" id="startButton">Démarrer le compte à rebours</button>
                 <script>
                     // Passer la valeur de raceTimeInMinutes depuis PHP vers JavaScript
                     let raceTimeInMinutesFromPHP = <?php echo $raceTime; ?>;
