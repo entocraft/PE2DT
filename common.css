@@ -26,3 +26,14 @@ body {
     background-color: #ddd;
     color: black;
 }
+
+li {
+    text-decoration: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+li h3{
+    justify-content: center;
+}

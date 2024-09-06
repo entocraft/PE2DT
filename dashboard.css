@@ -1,6 +1,6 @@
 .dashboard {
     display: flex;
-    height: calc(100% - 50px); /* Subtract the height of the navbar */
+    flex-direction: row;
 }
 
 .container {
@@ -104,6 +104,8 @@ form input[type="submit"]:hover {
     border-radius: 10px;
     color: rgb(255, 255, 255);
     padding: 4px 4px;
+    transition: transform 0.1s ease, background-color 0.3s ease;
+    margin-top: 5px;
 }
 
 .button:disabled {
@@ -112,4 +114,18 @@ form input[type="submit"]:hover {
     border-radius: 10px;
     color: rgb(85, 85, 85);
     padding: 4px 4px;
+}
+
+.new{
+    color: #86e745;
+}
+
+.button:hover {
+    transform: scale(0.98);  /* Réduit légèrement le bouton pour donner un effet de clic */
+    background-color: #2f259b;  /* Change la couleur de fond du bouton au clic */
+}
+
+.button:active {
+    transform: scale(0.95);  /* Réduit légèrement le bouton pour donner un effet de clic */
+    background-color: #d1d1d1;  /* Change la couleur de fond du bouton au clic */
 }
